@@ -1,0 +1,2183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LeetCode Pattern Practice (Dark Mode - Yellow Accent)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      /* Use Inter font */
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      /* Hide content initially */
+      .pattern-content,
+      #random-question-generator {
+        display: none;
+      }
+      .pattern-content.active,
+      #random-question-generator.active {
+        display: block; /* Show active content */
+      }
+      /* Style for code blocks (Dark Mode) */
+      pre {
+        background-color: #1f2937; /* gray-800 */
+        color: #d1d5db; /* gray-300 */
+        padding: 1rem;
+        border-radius: 0.5rem; /* rounded-lg */
+        overflow-x: auto;
+        margin-top: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: 0.875rem; /* text-sm */
+        border: 1px solid #374151; /* gray-700 */
+      }
+      code {
+        font-family: "monospace";
+        color: #9ca3af; /* gray-400 */ /* Default code color */
+      }
+      /* Specific syntax highlighting colors (simple example) */
+      code .language-python .hljs-keyword {
+        color: #818cf8;
+      } /* indigo-400 */
+      code .language-python .hljs-string {
+        color: #a5f3fc;
+      } /* cyan-300 */
+      code .language-python .hljs-number {
+        color: #fcd34d;
+      } /* amber-300 */
+      code .language-python .hljs-comment {
+        color: #6b7280;
+      } /* gray-500 */
+      code .language-python .hljs-function .hljs-title {
+        color: #6ee7b7;
+      } /* emerald-300 */
+      code .language-python .hljs-params {
+        color: #f9a8d4;
+      } /* pink-300 */
+
+      /* Style for sidebar buttons (Dark Mode) */
+      .nav-button {
+        transition: background-color 0.3s ease, transform 0.1s ease,
+          color 0.3s ease;
+        color: #d1d5db; /* gray-300 */
+        background-color: #374151; /* gray-700 */
+      }
+      .nav-button:hover {
+        background-color: #4b5563; /* gray-600 */
+        color: #f9fafb; /* gray-50 */
+      }
+      .nav-button:active {
+        transform: scale(0.98); /* Slight shrink effect on click */
+      }
+      .nav-button.active {
+        background-color: #f59e0b; /* amber-500 - CHANGED */
+        color: #1f2937; /* gray-800 for better contrast on amber */
+        font-weight: 600;
+      }
+      .nav-button.active:hover {
+        background-color: #d97706; /* amber-600 - CHANGED */
+      }
+
+      /* Styles for collapsible walkthrough steps (Dark Mode) */
+      .walkthrough-step {
+        border: 1px solid #374151; /* gray-700 */
+        border-radius: 0.375rem; /* rounded-md */
+        margin-bottom: 0.75rem; /* mb-3 */
+        overflow: hidden; /* Contain content */
+        background-color: #1f2937; /* gray-800 */
+      }
+      .walkthrough-step-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem; /* p-3 p-4 */
+        background-color: #374151; /* gray-700 */
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        color: #e5e7eb; /* gray-200 */
+      }
+      .walkthrough-step-header:hover {
+        background-color: #4b5563; /* gray-600 */
+      }
+      .walkthrough-step-content {
+        padding: 1rem 1rem 1rem 1rem; /* p-4 */
+        display: none; /* Hidden by default */
+        border-top: 1px solid #4b5563; /* gray-600 */
+        color: #d1d5db; /* gray-300 */
+      }
+      .walkthrough-step.open .walkthrough-step-content {
+        display: block; /* Show when open */
+      }
+      .walkthrough-step-header i.fa-chevron-right {
+        /* Target only the chevron */
+        transition: transform 0.3s ease;
+        color: #9ca3af; /* gray-400 */
+      }
+      .walkthrough-step.open .walkthrough-step-header i.fa-chevron-right {
+        transform: rotate(90deg);
+      }
+
+      /* Style for Random Question Generator (Dark Mode) */
+      #random-question-display {
+        background-color: #451a03; /* amber-950 - CHANGED */
+        border: 1px solid #f59e0b; /* amber-500 - CHANGED */
+        color: #fef3c7; /* amber-100 - CHANGED */
+        padding: 1.5rem; /* p-6 */
+        border-radius: 0.5rem; /* rounded-lg */
+        margin-top: 1rem; /* mt-4 */
+        min-height: 100px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .generate-button {
+        transition: background-color 0.3s ease, transform 0.1s ease;
+        background-color: #f59e0b; /* amber-500 - CHANGED */
+        color: #1f2937; /* gray-800 for contrast */
+      }
+      .generate-button:hover {
+        background-color: #d97706; /* amber-600 - CHANGED */
+      }
+      .generate-button:active {
+        transform: scale(0.98);
+      }
+      #random-question-display a {
+        /* Link style in random question */
+        color: #fcd34d; /* amber-300 - CHANGED */
+      }
+      #random-question-display a:hover {
+        color: #fef3c7; /* amber-100 - CHANGED */
+      }
+
+      /* Sidebar Minimization Styles */
+      #sidebar {
+        transition: width 0.3s ease;
+        width: 16rem; /* Default width (md:w-64) */
+      }
+      #sidebar.minimized {
+        width: 4rem; /* Minimized width */
+      }
+      #sidebar.minimized .sidebar-content {
+        display: none; /* Hide content when minimized */
+      }
+      #sidebar .sidebar-toggle-button {
+        position: absolute;
+        top: 1.5rem; /* Adjust as needed */
+        right: -1rem; /* Position outside the sidebar */
+        z-index: 10; /* Ensure it's clickable */
+        background-color: #f59e0b; /* amber-500 - CHANGED */
+        color: #1f2937; /* gray-800 for contrast */
+        border-radius: 50%;
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: background-color 0.2s ease, transform 0.3s ease;
+      }
+      #sidebar .sidebar-toggle-button:hover {
+        background-color: #d97706; /* amber-600 - CHANGED */
+      }
+      #sidebar.minimized .sidebar-toggle-button {
+        right: -1rem; /* Keep position relative to the edge */
+      }
+      #sidebar.minimized .sidebar-toggle-button i {
+        transform: rotate(180deg); /* Flip arrow */
+      }
+
+      /* Adjust main content margin based on sidebar state */
+      #main-content {
+        transition: margin-left 0.3s ease;
+        margin-left: 7rem; /* Default margin matching sidebar width */
+      }
+      #sidebar.minimized + #main-content {
+        margin-left: 4rem; /* Margin matching minimized sidebar */
+      }
+
+      /* On smaller screens, sidebar might overlay, so adjust minimization logic/styles if needed */
+      @media (max-width: 768px) {
+        /* md breakpoint */
+        #sidebar {
+          width: 100%; /* Full width on mobile */
+          position: absolute; /* Or fixed */
+          z-index: 40;
+          height: 100vh;
+          transform: translateX(-100%); /* Hide offscreen */
+          transition: transform 0.3s ease;
+        }
+        #sidebar:not(.minimized) {
+          /* Show when not minimized */
+          transform: translateX(0);
+        }
+        #sidebar.minimized {
+          /* Keep hidden when minimized on mobile */
+          transform: translateX(-100%);
+          width: 100%; /* Reset width */
+        }
+
+        #main-content {
+          margin-left: 0 !important; /* No margin needed when sidebar overlays */
+        }
+        /* Mobile toggle button positioning */
+        #sidebar .sidebar-toggle-button {
+          position: fixed; /* Fixed position relative to viewport */
+          top: 1rem;
+          left: 1rem;
+          right: auto; /* Override desktop style */
+          z-index: 50; /* Above sidebar */
+          transform: none !important; /* Disable rotation */
+        }
+        #sidebar.minimized .sidebar-toggle-button i {
+          transform: none; /* No rotate on mobile */
+        }
+        /* Add a backdrop for mobile overlay */
+        #sidebar-backdrop {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: 30; /* Below sidebar, above main content */
+          display: none; /* Hidden by default */
+          transition: opacity 0.3s ease;
+          opacity: 0;
+        }
+        #sidebar:not(.minimized) + #main-content + #sidebar-backdrop {
+          display: block;
+          opacity: 1;
+        }
+      }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  </head>
+  <body class="bg-gray-900 text-gray-200">
+    <div class="flex relative min-h-screen">
+      <aside
+        id="sidebar"
+        class="bg-gray-800 shadow-lg flex flex-col fixed md:relative inset-y-0 left-0 z-40 md:z-auto"
+      >
+        <button id="sidebar-toggle" class="sidebar-toggle-button md:absolute">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <div class="p-6 sidebar-content flex-grow flex flex-col">
+          <h1 class="text-2xl font-bold mb-6 text-amber-400">
+            LeetCode Patterns
+          </h1>
+          <nav class="flex-grow overflow-y-auto">
+            <p class="text-sm font-semibold text-gray-400 uppercase mb-2">
+              Core Patterns
+            </p>
+            <ul>
+              <li>
+                <button
+                  onclick="showContent('sliding-window')"
+                  data-target="sliding-window"
+                  class="nav-button w-full text-left p-3 mb-2 rounded-lg"
+                >
+                  Sliding Window
+                </button>
+              </li>
+              <li>
+                <button
+                  onclick="showContent('dynamic-programming')"
+                  data-target="dynamic-programming"
+                  class="nav-button w-full text-left p-3 mb-2 rounded-lg"
+                >
+                  Dynamic Programming
+                </button>
+              </li>
+              <li>
+                <button
+                  onclick="showContent('two-pointers')"
+                  data-target="two-pointers"
+                  class="nav-button w-full text-left p-3 mb-2 rounded-lg"
+                >
+                  Two Pointers
+                </button>
+              </li>
+              <li>
+                <button
+                  onclick="showContent('fast-slow-pointers')"
+                  data-target="fast-slow-pointers"
+                  class="nav-button w-full text-left p-3 mb-2 rounded-lg"
+                >
+                  Fast & Slow Pointers
+                </button>
+              </li>
+              <li>
+                <button
+                  onclick="showContent('bfs')"
+                  data-target="bfs"
+                  class="nav-button w-full text-left p-3 mb-2 rounded-lg"
+                >
+                  BFS
+                </button>
+              </li>
+              <li>
+                <button
+                  onclick="showContent('dfs')"
+                  data-target="dfs"
+                  class="nav-button w-full text-left p-3 mb-2 rounded-lg"
+                >
+                  DFS
+                </button>
+              </li>
+              <li>
+                <button
+                  onclick="showContent('merge-intervals')"
+                  data-target="merge-intervals"
+                  class="nav-button w-full text-left p-3 mb-2 rounded-lg"
+                >
+                  Merge Intervals
+                </button>
+              </li>
+              <li>
+                <button
+                  onclick="showContent('heap-priority-queue')"
+                  data-target="heap-priority-queue"
+                  class="nav-button w-full text-left p-3 mb-2 rounded-lg"
+                >
+                  Heap / Priority Queue
+                </button>
+              </li>
+            </ul>
+            <p class="text-sm font-semibold text-gray-400 uppercase mt-6 mb-2">
+              Practice
+            </p>
+            <ul>
+              <li>
+                <button
+                  onclick="showContent('random-question-generator')"
+                  data-target="random-question-generator"
+                  class="nav-button w-full text-left p-3 mb-2 rounded-lg"
+                >
+                  Random Question
+                </button>
+              </li>
+            </ul>
+          </nav>
+          <div class="mt-auto text-center text-xs text-gray-500 pt-4">
+            Pattern Practice Tool
+          </div>
+        </div>
+      </aside>
+
+      <main
+        id="main-content"
+        class="flex-1 p-6 md:p-10 overflow-y-auto bg-gray-900"
+      >
+        <div
+          id="welcome-message"
+          class="bg-gray-800 p-8 rounded-lg shadow-md border border-gray-700"
+        >
+          <h2 class="text-3xl font-semibold mb-4 text-gray-100">Welcome!</h2>
+          <p class="text-lg text-gray-300">
+            Select a pattern or the random question generator from the sidebar
+            to get started.
+          </p>
+          <p class="text-md text-gray-400 mt-4">
+            Learn common algorithmic patterns, see example problems, and
+            understand the step-by-step solutions.
+          </p>
+        </div>
+
+        <div
+          id="sliding-window"
+          class="pattern-content bg-gray-800 p-8 rounded-lg shadow-md border border-gray-700"
+        >
+          <h2
+            class="text-3xl font-semibold mb-6 border-b border-gray-700 pb-3 text-gray-100"
+          >
+            Sliding Window
+          </h2>
+          <section class="mb-8">
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Explanation
+            </h3>
+            <p class="mb-3 text-gray-300">
+              The Sliding Window pattern is used for problems involving arrays
+              or strings where you need to find or calculate something among all
+              contiguous subarrays (or substrings) of a given size or criteria.
+            </p>
+            <p class="mb-3 text-gray-300">
+              Instead of recalculating from scratch for each subarray, the
+              "window" (a conceptual range) slides over the data structure. As
+              it slides, you efficiently update the calculation by adding the
+              new element entering the window and removing the element leaving
+              it.
+            </p>
+            <p class="text-gray-300">
+              <strong>When to use it:</strong> Look for problems asking for
+              properties (max, min, average, longest, shortest) of a contiguous
+              subarray/substring, often with constraints on size or content.
+            </p>
+          </section>
+          <section class="mb-8">
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Sample Problem: Maximum Sum Subarray of Size K
+            </h3>
+            <p class="mb-3 text-gray-300">
+              <strong>Problem:</strong> Given an array of positive integers
+              `nums` and a positive integer `k`, find the maximum sum of any
+              contiguous subarray of size `k`.
+            </p>
+            <p class="mb-3 text-gray-300"><strong>Example:</strong></p>
+            <pre><code class="language-text">nums = [2, 1, 5, 1, 3, 2], k = 3
+Output: 9 (from subarray [5, 1, 3])</code></pre>
+          </section>
+          <section>
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Walkthrough
+            </h3>
+            <div class="space-y-3">
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>1. Initialize</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  Calculate the sum of the first `k` elements. This is the sum
+                  of our initial window. Store this sum as the current maximum
+                  sum found so far (`max_sum`).
+                  <pre><code class="language-python">
+# Python Example
+nums = [2, 1, 5, 1, 3, 2]
+k = 3
+current_sum = sum(nums[0:k]) # Sum of the first k elements (2+1+5 = 8)
+max_sum = current_sum        # Initialize max_sum
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>2. Slide the Window</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  Iterate through the array starting from the `k`-th element
+                  (`index k`). In each step:
+                  <ul
+                    class="list-disc list-inside ml-6 mt-2 space-y-1 text-gray-300"
+                  >
+                    <li>
+                      Add the current element (entering the window) to
+                      `current_sum`.
+                    </li>
+                    <li>
+                      Subtract the element that just left the window (`index i -
+                      k`) from `current_sum`.
+                    </li>
+                    <li>
+                      Compare the updated `current_sum` with `max_sum` and
+                      update `max_sum` if needed.
+                    </li>
+                  </ul>
+                  <pre><code class="language-python">
+# Continue Python Example
+for i in range(k, len(nums)):
+    current_sum += nums[i]      # Add new element
+    current_sum -= nums[i - k]  # Remove old element
+    max_sum = max(max_sum, current_sum) # Update max
+
+# Iteration details:
+# i=3: current_sum = 8 + nums[3] - nums[0] = 8 + 1 - 2 = 7. max_sum = max(8, 7) = 8
+# i=4: current_sum = 7 + nums[4] - nums[1] = 7 + 3 - 1 = 9. max_sum = max(8, 9) = 9
+# i=5: current_sum = 9 + nums[5] - nums[2] = 9 + 2 - 5 = 6. max_sum = max(9, 6) = 9
+
+print(f"Maximum sum: {max_sum}") # Output: 9
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>3. Result</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  After the loop finishes, `max_sum` holds the maximum sum found
+                  among all subarrays of size `k`.
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>4. Complexity</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  <ul class="list-disc list-inside space-y-1 text-gray-300">
+                    <li>
+                      Time Complexity: O(N) - Single pass through the array.
+                    </li>
+                    <li>Space Complexity: O(1) - Constant extra space used.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div
+          id="dynamic-programming"
+          class="pattern-content bg-gray-800 p-8 rounded-lg shadow-md border border-gray-700"
+        >
+          <h2
+            class="text-3xl font-semibold mb-6 border-b border-gray-700 pb-3 text-gray-100"
+          >
+            Dynamic Programming (DP)
+          </h2>
+          <section class="mb-8">
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Explanation
+            </h3>
+            <p class="mb-3 text-gray-300">
+              Dynamic Programming is an optimization technique for problems
+              breakable into overlapping subproblems with optimal substructure.
+            </p>
+            <ul class="list-disc list-inside mb-3 space-y-1 text-gray-300">
+              <li>
+                <strong>Overlapping Subproblems:</strong> Solutions to
+                subproblems are reused. DP stores results
+                (memoization/tabulation) to avoid recomputation.
+              </li>
+              <li>
+                <strong>Optimal Substructure:</strong> The optimal solution to
+                the main problem is built from optimal solutions of its
+                subproblems.
+              </li>
+            </ul>
+            <p class="mb-3 text-gray-300">
+              <strong>Approaches:</strong> Memoization (Top-Down Recursive with
+              Cache) & Tabulation (Bottom-Up Iterative with Table).
+            </p>
+          </section>
+          <section class="mb-8">
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Sample Problem: Climbing Stairs
+            </h3>
+            <p class="mb-3 text-gray-300">
+              <strong>Problem:</strong> You are climbing `n` steps. You can
+              climb 1 or 2 steps at a time. How many distinct ways can you reach
+              the top?
+            </p>
+            <p class="mb-3 text-gray-300"><strong>Examples:</strong></p>
+            <pre><code class="language-text">n = 2 -> Output: 2 (1+1, 2)
+n = 3 -> Output: 3 (1+1+1, 1+2, 2+1)</code></pre>
+          </section>
+          <section>
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Walkthrough (Tabulation Approach)
+            </h3>
+            <div class="space-y-3">
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>1. Identify Subproblems & Recurrence</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  Let `dp[i]` be the number of ways to reach step `i`. To reach
+                  step `i`, you must have come from `i-1` (1 step) or `i-2` (2
+                  steps).
+                  <p class="mt-2 font-semibold text-gray-200">
+                    Recurrence: `dp[i] = dp[i-1] + dp[i-2]`
+                  </p>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>2. Base Cases</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  <ul class="list-disc list-inside space-y-1 text-gray-300">
+                    <li>`dp[1] = 1` (Only way is 1 step)</li>
+                    <li>`dp[2] = 2` (Ways are 1+1 or 2 steps)</li>
+                  </ul>
+                  (We can consider `dp[0]=1` if needed for the recurrence start,
+                  but `dp[1]` and `dp[2]` are sufficient to bootstrap).
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>3. Build the Table (Tabulation)</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  Create `dp` array of size `n+1`. Fill base cases. Iterate from
+                  `i=3` to `n`, applying the recurrence.
+                  <pre><code class="language-python">
+# Python Example (Tabulation)
+def climb_stairs(n):
+    if n <= 0: return 0
+    if n == 1: return 1
+    dp = [0] * (n + 1)
+    dp[1] = 1
+    if n >= 2:
+        dp[2] = 2
+    for i in range(3, n + 1):
+        dp[i] = dp[i - 1] + dp[i - 2]
+    return dp[n]
+
+print(f"Ways(3): {climb_stairs(3)}") # Output: 3
+print(f"Ways(5): {climb_stairs(5)}") # Output: 8
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>4. Optimization (Space)</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  Since `dp[i]` only depends on `dp[i-1]` and `dp[i-2]`, we only
+                  need to store the last two values.
+                  <pre><code class="language-python">
+# Python Example (Space Optimized)
+def climb_stairs_optimized(n):
+    if n <= 1: return n > 0 # Handles n=0 and n=1
+    prev1, prev2 = 1, 1 # Ways to reach step 1, ways to reach step 0 (conceptual)
+    for _ in range(2, n + 1):
+        current_ways = prev1 + prev2
+        prev2 = prev1
+        prev1 = current_ways
+    return prev1 # prev1 holds ways to reach step n
+
+print(f"Ways(5) Opt: {climb_stairs_optimized(5)}") # Output: 8
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>5. Complexity</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  <ul class="list-disc list-inside space-y-1 text-gray-300">
+                    <li>Time: O(N) - Single loop up to `n`.</li>
+                    <li>
+                      Space: O(N) for tabulation, O(1) for optimized version.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div
+          id="two-pointers"
+          class="pattern-content bg-gray-800 p-8 rounded-lg shadow-md border border-gray-700"
+        >
+          <h2
+            class="text-3xl font-semibold mb-6 border-b border-gray-700 pb-3 text-gray-100"
+          >
+            Two Pointers
+          </h2>
+          <section class="mb-8">
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Explanation
+            </h3>
+            <p class="mb-3 text-gray-300">
+              The Two Pointers technique uses two pointers (indices) that
+              iterate through a data structure, often an array or string, until
+              one or both pointers reach a certain condition.
+            </p>
+            <p class="mb-3 text-gray-300">
+              Pointers can move towards each other (from opposite ends), in the
+              same direction (but at different speeds or starting points), or
+              one fixed while the other searches.
+            </p>
+            <p class="text-gray-300">
+              <strong>When to use it:</strong> Effective for problems involving
+              sorted arrays (finding pairs, triplets), palindromes, removing
+              duplicates, or comparing elements from opposite ends.
+            </p>
+          </section>
+          <section class="mb-8">
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Sample Problem: Two Sum II - Input Array Is Sorted
+            </h3>
+            <p class="mb-3 text-gray-300">
+              <strong>Problem:</strong> Given a 1-indexed array of integers
+              `numbers` that is already sorted in non-decreasing order, find two
+              numbers such that they add up to a specific `target` number.
+              Return the indices (plus one) of the two numbers as an array
+              `[index1, index2]`.
+            </p>
+            <p class="mb-3 text-gray-300"><strong>Example:</strong></p>
+            <pre><code class="language-text">numbers = [2, 7, 11, 15], target = 9
+Output: [1, 2]
+Explanation: The sum of 2 and 7 is 9. Their indices are 1 and 2.</code></pre>
+          </section>
+          <section>
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Walkthrough
+            </h3>
+            <div class="space-y-3">
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>1. Initialize Pointers</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  Set one pointer (`left`) to the beginning of the array (index
+                  0) and another pointer (`right`) to the end of the array
+                  (index `len(numbers) - 1`).
+                  <pre><code class="language-python">
+# Python Example
+numbers = [2, 7, 11, 15]
+target = 9
+left = 0
+right = len(numbers) - 1
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>2. Iterate and Adjust</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  While `left` is less than `right`:
+                  <ul
+                    class="list-disc list-inside ml-6 mt-2 space-y-1 text-gray-300"
+                  >
+                    <li>
+                      Calculate the `current_sum` of elements at `numbers[left]`
+                      and `numbers[right]`.
+                    </li>
+                    <li>
+                      If `current_sum` equals `target`, we found the pair.
+                      Return `[left + 1, right + 1]`.
+                    </li>
+                    <li>
+                      If `current_sum` is less than `target`, we need a larger
+                      sum. Since the array is sorted, increment `left` to
+                      consider a larger number.
+                    </li>
+                    <li>
+                      If `current_sum` is greater than `target`, we need a
+                      smaller sum. Decrement `right` to consider a smaller
+                      number.
+                    </li>
+                  </ul>
+                  <pre><code class="language-python">
+# Continue Python Example
+while left < right:
+    current_sum = numbers[left] + numbers[right]
+    if current_sum == target:
+        # Found the pair, return 1-based indices
+        result = [left + 1, right + 1]
+        print(f"Found indices: {result}") # Output: [1, 2]
+        break # Or return result directly
+    elif current_sum < target:
+        left += 1 # Need a larger sum, move left pointer right
+    else: # current_sum > target
+        right -= 1 # Need a smaller sum, move right pointer left
+
+# Example Trace:
+# Initial: left=0 (2), right=3 (15). sum=17 > 9. right=2.
+# Next: left=0 (2), right=2 (11). sum=13 > 9. right=1.
+# Next: left=0 (2), right=1 (7). sum=9 == 9. Found! Return [0+1, 1+1] = [1, 2].
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>3. Result</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  The loop terminates when the pointers cross or the target sum
+                  is found. The function returns the 1-based indices of the
+                  pair. (The problem guarantees exactly one solution).
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>4. Complexity</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  <ul class="list-disc list-inside space-y-1 text-gray-300">
+                    <li>
+                      Time Complexity: O(N) - Each pointer traverses the array
+                      at most once.
+                    </li>
+                    <li>
+                      Space Complexity: O(1) - Constant extra space used for
+                      pointers and sum.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div
+          id="fast-slow-pointers"
+          class="pattern-content bg-gray-800 p-8 rounded-lg shadow-md border border-gray-700"
+        >
+          <h2
+            class="text-3xl font-semibold mb-6 border-b border-gray-700 pb-3 text-gray-100"
+          >
+            Fast & Slow Pointers
+          </h2>
+          <section class="mb-8">
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Explanation
+            </h3>
+            <p class="mb-3 text-gray-300">
+              Also known as the "Hare & Tortoise" algorithm, this technique uses
+              two pointers moving through a sequence (often a linked list or
+              array) at different speeds.
+            </p>
+            <ul class="list-disc list-inside mb-3 space-y-1 text-gray-300">
+              <li>A `slow` pointer typically moves one step at a time.</li>
+              <li>A `fast` pointer typically moves two steps at a time.</li>
+            </ul>
+            <p class="text-gray-300">
+              <strong>When to use it:</strong> Ideal for detecting cycles in
+              linked lists, finding the middle element of a linked list, or
+              problems where relative positions or cycle lengths matter.
+            </p>
+          </section>
+          <section class="mb-8">
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Sample Problem: Linked List Cycle
+            </h3>
+            <p class="mb-3 text-gray-300">
+              <strong>Problem:</strong> Given the `head` of a linked list,
+              determine if the linked list has a cycle in it. There is a cycle
+              if some node in the list can be reached again by continuously
+              following the `next` pointer.
+            </p>
+            <p class="mb-3 text-gray-300"><strong>Example:</strong></p>
+            <pre><code class="language-text">Input: head = [3,2,0,-4], pos = 1 (tail connects to node at index 1)
+Output: true</code></pre>
+            <p class="italic text-sm text-gray-500">
+              (Note: For implementation, we assume a `ListNode` class exists
+              with `val` and `next` attributes.)
+            </p>
+          </section>
+          <section>
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Walkthrough
+            </h3>
+            <div class="space-y-3">
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>1. Initialize Pointers</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  Start both `slow` and `fast` pointers at the `head` of the
+                  linked list. Handle edge cases (empty list or list with one
+                  node).
+                  <pre><code class="language-python">
+# Python Example (assuming ListNode class)
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+def has_cycle(head: ListNode) -> bool:
+    if not head or not head.next:
+        return False # No cycle if list is empty or has only one node
+
+    slow = head
+    fast = head
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>2. Move Pointers</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  Iterate as long as the `fast` pointer and its `next` node are
+                  not `None` (to avoid errors when moving two steps):
+                  <ul
+                    class="list-disc list-inside ml-6 mt-2 space-y-1 text-gray-300"
+                  >
+                    <li>Move `slow` one step: `slow = slow.next`.</li>
+                    <li>Move `fast` two steps: `fast = fast.next.next`.</li>
+                    <li>
+                      Check if `slow` and `fast` pointers meet (`slow == fast`).
+                      If they do, a cycle exists.
+                    </li>
+                  </ul>
+                  <pre><code class="language-python">
+# Continue Python Example
+    while fast and fast.next:
+        slow = slow.next      # Move slow pointer by 1
+        fast = fast.next.next  # Move fast pointer by 2
+
+        # Check if pointers meet
+        if slow == fast:
+            print("Cycle detected!")
+            return True # Cycle found
+
+    # If the loop finishes, fast reached the end (None), so no cycle
+    print("No cycle found.")
+    return False
+                                </code></pre>
+                  <p class="mt-3 text-gray-300">
+                    <strong>Why this works:</strong> If there's no cycle, the
+                    `fast` pointer will eventually reach the end (`None`). If
+                    there *is* a cycle, the `fast` pointer will enter the cycle
+                    and eventually "lap" the `slow` pointer, causing them to
+                    meet at the same node.
+                  </p>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>3. Result</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  If the loop completes without the pointers meeting, it means
+                  the `fast` pointer reached the end of the list, indicating no
+                  cycle. Return `False`. If they meet, return `True`.
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>4. Complexity</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  <ul class="list-disc list-inside space-y-1 text-gray-300">
+                    <li>
+                      Time Complexity: O(N) - Proportional to list length.
+                    </li>
+                    <li>
+                      Space Complexity: O(1) - Only two pointers are used.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div
+          id="bfs"
+          class="pattern-content bg-gray-800 p-8 rounded-lg shadow-md border border-gray-700"
+        >
+          <h2
+            class="text-3xl font-semibold mb-6 border-b border-gray-700 pb-3 text-gray-100"
+          >
+            Breadth-First Search (BFS)
+          </h2>
+          <section class="mb-8">
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Explanation
+            </h3>
+            <p class="mb-3 text-gray-300">
+              Breadth-First Search (BFS) is a graph traversal algorithm that
+              explores neighbor nodes level by level. It starts at a source node
+              and explores all its immediate neighbors first, before moving on
+              to the next level of neighbors.
+            </p>
+            <p class="mb-3 text-gray-300">
+              It typically uses a queue data structure to keep track of nodes to
+              visit. It also often uses a set or boolean array to keep track of
+              visited nodes to avoid cycles and redundant processing.
+            </p>
+            <p class="text-gray-300">
+              <strong>When to use it:</strong> Finding the shortest path in
+              unweighted graphs, level order traversal of trees, web crawling,
+              finding connected components.
+            </p>
+          </section>
+          <section class="mb-8">
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Sample Problem: Binary Tree Level Order Traversal
+            </h3>
+            <p class="mb-3 text-gray-300">
+              <strong>Problem:</strong> Given the `root` of a binary tree,
+              return the level order traversal of its nodes' values. (i.e., from
+              left to right, level by level).
+            </p>
+            <p class="mb-3 text-gray-300"><strong>Example:</strong></p>
+            <pre><code class="language-text">Input: root = [3,9,20,null,null,15,7]
+   3
+  / \
+ 9  20
+   /  \
+  15   7
+Output: [[3],[9,20],[15,7]]</code></pre>
+            <p class="italic text-sm text-gray-500">
+              (Note: Assumes a `TreeNode` class with `val`, `left`, `right`
+              attributes.)
+            </p>
+          </section>
+          <section>
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Walkthrough
+            </h3>
+            <div class="space-y-3">
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>1. Initialize Queue and Result List</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  If the `root` is null, return an empty list. Otherwise,
+                  initialize a queue (e.g., `collections.deque` in Python) and
+                  add the `root` node to it. Initialize an empty list `results`
+                  to store the levels.
+                  <pre><code class="language-python">
+# Python Example (assuming TreeNode class)
+import collections
+
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+def levelOrder(root: TreeNode) -> list[list[int]]:
+    if not root:
+        return []
+
+    results = []
+    queue = collections.deque([root]) # Initialize queue with root
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>2. Process Level by Level</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  While the queue is not empty:
+                  <ul
+                    class="list-disc list-inside ml-6 mt-2 space-y-1 text-gray-300"
+                  >
+                    <li>
+                      Get the number of nodes currently in the queue
+                      (`level_size`). This represents all nodes at the current
+                      level.
+                    </li>
+                    <li>
+                      Initialize an empty list `current_level` to store the
+                      values of nodes at this level.
+                    </li>
+                    <li>
+                      Loop `level_size` times:
+                      <ul>
+                        <li>Dequeue a node from the front of the queue.</li>
+                        <li>Add the node's value to `current_level`.</li>
+                        <li>If the node has a left child, enqueue it.</li>
+                        <li>If the node has a right child, enqueue it.</li>
+                      </ul>
+                    </li>
+                    <li>
+                      After processing all nodes at the current level, append
+                      `current_level` to the `results` list.
+                    </li>
+                  </ul>
+                  <pre><code class="language-python">
+# Continue Python Example
+    while queue:
+        level_size = len(queue) # Number of nodes at the current level
+        current_level = []      # Store node values for this level
+
+        for _ in range(level_size):
+            node = queue.popleft() # Dequeue node from the front
+            current_level.append(node.val)
+
+            # Enqueue children for the next level
+            if node.left:
+                queue.append(node.left)
+            if node.right:
+                queue.append(node.right)
+
+        results.append(current_level) # Add completed level to results
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>3. Result</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  Once the queue is empty (all levels processed), return the
+                  `results` list containing lists of node values for each level.
+                  <pre><code class="language-python">
+# Complete Python function
+    return results
+
+# Example Usage (assuming tree is constructed)
+# root = TreeNode(3, TreeNode(9), TreeNode(20, TreeNode(15), TreeNode(7)))
+# print(levelOrder(root)) # Output: [[3], [9, 20], [15, 7]]
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>4. Complexity</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  <ul class="list-disc list-inside space-y-1 text-gray-300">
+                    <li>
+                      Time Complexity: O(N) - Each node is visited and processed
+                      exactly once.
+                    </li>
+                    <li>
+                      Space Complexity: O(W) - Where W is the maximum width of
+                      the tree. In the worst case (a complete binary tree), the
+                      last level can contain up to N/2 nodes, so space can be
+                      O(N).
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div
+          id="dfs"
+          class="pattern-content bg-gray-800 p-8 rounded-lg shadow-md border border-gray-700"
+        >
+          <h2
+            class="text-3xl font-semibold mb-6 border-b border-gray-700 pb-3 text-gray-100"
+          >
+            Depth-First Search (DFS)
+          </h2>
+          <section class="mb-8">
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Explanation
+            </h3>
+            <p class="mb-3 text-gray-300">
+              Depth-First Search (DFS) is a graph traversal algorithm that
+              explores as far as possible along each branch before backtracking.
+              It starts at a source node and explores along a path until it
+              reaches a dead end or an unvisited node, then backtracks to
+              explore other branches.
+            </p>
+            <p class="mb-3 text-gray-300">
+              DFS can be implemented using recursion (implicitly using the call
+              stack) or iteratively using an explicit stack data structure. Like
+              BFS, it often uses a way to track visited nodes.
+            </p>
+            <p class="text-gray-300">
+              <strong>When to use it:</strong> Pathfinding, cycle detection,
+              topological sorting, solving puzzles with backtracking (like mazes
+              or Sudoku), checking graph connectivity, tree traversals
+              (preorder, inorder, postorder).
+            </p>
+          </section>
+          <section class="mb-8">
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Sample Problem: Number of Islands
+            </h3>
+            <p class="mb-3 text-gray-300">
+              <strong>Problem:</strong> Given an `m x n` 2D binary grid `grid`
+              which represents a map of '1's (land) and '0's (water), return the
+              number of islands. An island is surrounded by water and is formed
+              by connecting adjacent lands horizontally or vertically.
+            </p>
+            <p class="mb-3 text-gray-300"><strong>Example:</strong></p>
+            <pre><code class="language-text">Input: grid = [
+  ["1","1","0","0","0"],
+  ["1","1","0","0","0"],
+  ["0","0","1","0","0"],
+  ["0","0","0","1","1"]
+]
+Output: 3</code></pre>
+          </section>
+          <section>
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Walkthrough (Recursive DFS)
+            </h3>
+            <div class="space-y-3">
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>1. Initialize Island Count</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  Start with an `island_count` of 0. Get the dimensions (rows,
+                  cols) of the grid. Handle the edge case of an empty grid.
+                  <pre><code class="language-python">
+# Python Example
+def numIslands(grid: list[list[str]]) -> int:
+    if not grid or not grid[0]:
+        return 0
+
+    rows, cols = len(grid), len(grid[0])
+    island_count = 0
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>2. Iterate Through Grid</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  Loop through each cell (`r`, `c`) of the grid.
+                  <ul
+                    class="list-disc list-inside ml-6 mt-2 space-y-1 text-gray-300"
+                  >
+                    <li>
+                      If the current cell `grid[r][c]` is '1' (land):
+                      <ul>
+                        <li>Increment `island_count`.</li>
+                        <li>
+                          Start a DFS traversal from this cell (`r`, `c`) to
+                          mark all connected land cells of this island as
+                          visited (e.g., by changing '1' to '0' or using a
+                          separate visited set).
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <pre><code class="language-python">
+# Continue Python Example
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == '1':
+                island_count += 1
+                dfs(grid, r, c) # Start DFS to mark the current island
+
+    return island_count
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>3. Implement DFS Helper Function</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  Create a helper function `dfs(grid, r, c)`:
+                  <ul
+                    class="list-disc list-inside ml-6 mt-2 space-y-1 text-gray-300"
+                  >
+                    <li>
+                      <strong>Base Cases (Termination):</strong> Stop if `r` or
+                      `c` are out of bounds, or if `grid[r][c]` is '0' (water)
+                      or already visited (if not modifying grid).
+                    </li>
+                    <li>
+                      <strong>Mark as Visited:</strong> Change `grid[r][c]` to
+                      '0' to mark it as visited.
+                    </li>
+                    <li>
+                      <strong>Recursive Calls:</strong> Recursively call `dfs`
+                      for all four adjacent neighbors (up, down, left, right).
+                    </li>
+                  </ul>
+                  <pre><code class="language-python">
+# DFS Helper Function (defined within or outside numIslands)
+def dfs(grid, r, c):
+    rows, cols = len(grid), len(grid[0])
+
+    # Base case: Check boundaries and if it's water or already visited
+    if r < 0 or c < 0 or r >= rows or c >= cols or grid[r][c] == '0':
+        return
+
+    # Mark current cell as visited (by changing it to '0')
+    grid[r][c] = '0'
+
+    # Explore neighbors recursively
+    dfs(grid, r + 1, c) # Down
+    dfs(grid, r - 1, c) # Up
+    dfs(grid, r, c + 1) # Right
+    dfs(grid, r, c - 1) # Left
+
+# Note: The main numIslands function needs access to this dfs function.
+# It's common to define it as a nested function or pass grid dimensions.
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>4. Result</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  After iterating through the entire grid, the `island_count`
+                  will hold the total number of distinct islands found. Return
+                  `island_count`.
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>5. Complexity</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  <ul class="list-disc list-inside space-y-1 text-gray-300">
+                    <li>
+                      Time Complexity: O(M * N) - Where M is the number of rows
+                      and N is the number of columns. Each cell is visited at
+                      most once by the main loop and the DFS.
+                    </li>
+                    <li>
+                      Space Complexity: O(M * N) - In the worst case (a grid
+                      full of land), the recursion depth of DFS could go up to M
+                      * N, consuming stack space. If using an explicit
+                      stack/visited set, it could also take O(M*N) space.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div
+          id="merge-intervals"
+          class="pattern-content bg-gray-800 p-8 rounded-lg shadow-md border border-gray-700"
+        >
+          <h2
+            class="text-3xl font-semibold mb-6 border-b border-gray-700 pb-3 text-gray-100"
+          >
+            Merge Intervals
+          </h2>
+          <section class="mb-8">
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Explanation
+            </h3>
+            <p class="mb-3 text-gray-300">
+              The Merge Intervals pattern deals with problems involving
+              overlapping intervals. The goal is usually to merge overlapping
+              intervals into a smaller set of non-overlapping intervals or to
+              find intersections/conflicts.
+            </p>
+            <p class="mb-3 text-gray-300">
+              A crucial first step is almost always sorting the intervals based
+              on their start times. Then, iterate through the sorted intervals,
+              merging the current interval with the previous one if they
+              overlap.
+            </p>
+            <p class="text-gray-300">
+              <strong>When to use it:</strong> Problems involving scheduling
+              (meeting rooms, appointments), finding overlapping ranges,
+              consolidating intervals.
+            </p>
+          </section>
+          <section class="mb-8">
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Sample Problem: Merge Intervals
+            </h3>
+            <p class="mb-3 text-gray-300">
+              <strong>Problem:</strong> Given an array of `intervals` where
+              `intervals[i] = [start_i, end_i]`, merge all overlapping
+              intervals, and return an array of the non-overlapping intervals
+              that cover all the intervals in the input.
+            </p>
+            <p class="mb-3 text-gray-300"><strong>Example:</strong></p>
+            <pre><code class="language-text">Input: intervals = [[1,3],[2,6],[8,10],[15,18]]
+Output: [[1,6],[8,10],[15,18]]
+Explanation: Since intervals [1,3] and [2,6] overlap, merge them into [1,6].</code></pre>
+            <pre><code class="language-text">Input: intervals = [[1,4],[4,5]]
+Output: [[1,5]]
+Explanation: Intervals [1,4] and [4,5] are considered overlapping.</code></pre>
+          </section>
+          <section>
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Walkthrough
+            </h3>
+            <div class="space-y-3">
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>1. Sort Intervals</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  Sort the input `intervals` array based on the start time of
+                  each interval. Handle the edge case of an empty or
+                  single-interval input.
+                  <pre><code class="language-python">
+# Python Example
+def merge(intervals: list[list[int]]) -> list[list[int]]:
+    if not intervals:
+        return []
+
+    # Sort intervals based on the start time (index 0)
+    intervals.sort(key=lambda x: x[0])
+
+    merged = [] # List to store the merged intervals
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>2. Iterate and Merge</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  Initialize the `merged` list with the first interval from the
+                  sorted list. Iterate through the remaining sorted intervals
+                  starting from the second one.
+                  <ul
+                    class="list-disc list-inside ml-6 mt-2 space-y-1 text-gray-300"
+                  >
+                    <li>
+                      Let `last_merged` be the last interval added to the
+                      `merged` list.
+                    </li>
+                    <li>
+                      Let `current_interval` be the interval being considered in
+                      the loop.
+                    </li>
+                    <li>
+                      <strong>Check for Overlap:</strong> If the
+                      `current_interval`'s start time is less than or equal to
+                      the `last_merged`'s end time (`current_interval[0] <=
+                      last_merged[1]`), they overlap.
+                    </li>
+                    <li>
+                      <strong>Merge:</strong> If they overlap, update the
+                      `last_merged`'s end time to be the maximum of its current
+                      end time and the `current_interval`'s end time
+                      (`last_merged[1] = max(last_merged[1],
+                      current_interval[1])`).
+                    </li>
+                    <li>
+                      <strong>No Overlap:</strong> If they don't overlap, add
+                      the `current_interval` as a new interval to the `merged`
+                      list.
+                    </li>
+                  </ul>
+                  <pre><code class="language-python">
+# Continue Python Example
+    merged.append(intervals[0]) # Add the first interval
+
+    for current_interval in intervals[1:]:
+        last_merged = merged[-1] # Get the last interval added
+
+        # Check for overlap: current start <= last end
+        if current_interval[0] <= last_merged[1]:
+            # Merge: Update the end time of the last merged interval
+            last_merged[1] = max(last_merged[1], current_interval[1])
+        else:
+            # No overlap: Add the current interval as a new one
+            merged.append(current_interval)
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>3. Result</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  After iterating through all intervals, the `merged` list
+                  contains the final set of non-overlapping intervals. Return
+                  `merged`.
+                  <pre><code class="language-python">
+# Complete Python function
+    return merged
+
+# Example Usage:
+intervals1 = [[1,3],[2,6],[8,10],[15,18]]
+print(f"Merged intervals 1: {merge(intervals1)}")
+# Output: [[1, 6], [8, 10], [15, 18]]
+
+intervals2 = [[1,4],[4,5]]
+print(f"Merged intervals 2: {merge(intervals2)}")
+# Output: [[1, 5]]
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>4. Complexity</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  <ul class="list-disc list-inside space-y-1 text-gray-300">
+                    <li>
+                      Time Complexity: O(N log N) - Dominated by the sorting
+                      step. The iteration takes O(N).
+                    </li>
+                    <li>
+                      Space Complexity: O(N) or O(log N) - O(N) if we consider
+                      the space for the `merged` list. The space complexity of
+                      sorting depends on the algorithm used (Python's Timsort is
+                      O(N) in the worst case, but often closer to O(log N) on
+                      average for auxiliary space).
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div
+          id="heap-priority-queue"
+          class="pattern-content bg-gray-800 p-8 rounded-lg shadow-md border border-gray-700"
+        >
+          <h2
+            class="text-3xl font-semibold mb-6 border-b border-gray-700 pb-3 text-gray-100"
+          >
+            Heap / Priority Queue
+          </h2>
+          <section class="mb-8">
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Explanation
+            </h3>
+            <p class="mb-3 text-gray-300">
+              This pattern involves using a Heap (often implemented as a
+              Priority Queue) data structure. A Heap allows efficient retrieval
+              (and removal) of the minimum (Min-Heap) or maximum (Max-Heap)
+              element.
+            </p>
+            <p class="mb-3 text-gray-300">
+              Heaps are useful when you need to repeatedly find the
+              smallest/largest element among a dynamically changing collection,
+              or when you need to maintain a set of the 'k' smallest/largest
+              elements seen so far.
+            </p>
+            <p class="mb-3 text-gray-300">
+              Python's `heapq` module provides an implementation of the min-heap
+              algorithm.
+            </p>
+            <p class="text-gray-300">
+              <strong>When to use it:</strong> Finding the Kth smallest/largest
+              element, Top K frequent elements, Median of a data stream,
+              scheduling problems (e.g., minimum meeting rooms), implementing
+              Dijkstra's algorithm or Prim's algorithm.
+            </p>
+          </section>
+          <section class="mb-8">
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Sample Problem: Top K Frequent Elements
+            </h3>
+            <p class="mb-3 text-gray-300">
+              <strong>Problem:</strong> Given an integer array `nums` and an
+              integer `k`, return the `k` most frequent elements. You may return
+              the answer in any order.
+            </p>
+            <p class="mb-3 text-gray-300"><strong>Example:</strong></p>
+            <pre><code class="language-text">Input: nums = [1,1,1,2,2,3], k = 2
+Output: [1,2] (1 appears 3 times, 2 appears 2 times)</code></pre>
+            <pre><code class="language-text">Input: nums = [1], k = 1
+Output: [1]</code></pre>
+          </section>
+          <section>
+            <h3 class="text-2xl font-medium mb-3 text-amber-400">
+              Walkthrough (Using Min-Heap)
+            </h3>
+            <div class="space-y-3">
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>1. Count Frequencies</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  Use a hash map (dictionary in Python) to count the frequency
+                  of each number in the input array `nums`.
+                  <pre><code class="language-python">
+# Python Example
+import heapq
+from collections import Counter
+
+def topKFrequent(nums: list[int], k: int) -> list[int]:
+    if not nums or k == 0:
+        return []
+
+    # Step 1: Count frequencies
+    counts = Counter(nums) # e.g., {1: 3, 2: 2, 3: 1} for nums=[1,1,1,2,2,3]
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>2. Use a Min-Heap of Size K</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  Initialize an empty min-heap. Iterate through the `(number,
+                  frequency)` pairs from the frequency map:
+                  <ul
+                    class="list-disc list-inside ml-6 mt-2 space-y-1 text-gray-300"
+                  >
+                    <li>
+                      Push the `(frequency, number)` tuple onto the min-heap. We
+                      put frequency first because the heap orders by the first
+                      element of the tuple.
+                    </li>
+                    <li>
+                      If the size of the heap exceeds `k`, pop the smallest
+                      element (which corresponds to the element with the lowest
+                      frequency currently in the heap).
+                    </li>
+                  </ul>
+                  By maintaining a min-heap of size `k` ordered by frequency,
+                  the heap will eventually hold the `k` elements with the
+                  highest frequencies seen so far.
+                  <pre><code class="language-python">
+# Continue Python Example
+    # Step 2: Use a min-heap to keep track of top k frequent elements
+    min_heap = [] # Stores (frequency, number)
+
+    for number, freq in counts.items():
+        heapq.heappush(min_heap, (freq, number))
+        # If heap size exceeds k, remove the element with the smallest frequency
+        if len(min_heap) > k:
+            heapq.heappop(min_heap) # Removes the tuple with the minimum frequency
+
+    # After iterating through all items, min_heap contains the k elements
+    # with the highest frequencies.
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>3. Extract Result</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  The min-heap now contains `k` tuples of `(frequency, number)`
+                  representing the top `k` frequent elements. Extract just the
+                  numbers from these tuples.
+                  <pre><code class="language-python">
+# Continue Python Example
+    # Step 3: Extract the numbers from the heap
+    top_k = [number for freq, number in min_heap]
+    return top_k
+
+# Example Usage:
+nums1 = [1,1,1,2,2,3]
+k1 = 2
+print(f"Top {k1} frequent in {nums1}: {topKFrequent(nums1, k1)}")
+# Output: [1, 2] or [2, 1]
+
+nums2 = [1]
+k2 = 1
+print(f"Top {k2} frequent in {nums2}: {topKFrequent(nums2, k2)}")
+# Output: [1]
+                                </code></pre>
+                </div>
+              </div>
+              <div class="walkthrough-step">
+                <div class="walkthrough-step-header">
+                  <strong>4. Complexity</strong>
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="walkthrough-step-content">
+                  <ul class="list-disc list-inside space-y-1 text-gray-300">
+                    <li>
+                      Time Complexity: O(N log K) - Counting frequencies takes
+                      O(N). Iterating through the unique elements (let's say M
+                      unique elements, M <= N) and performing heap operations
+                      takes O(M log K). In the worst case M=N, so O(N log K).
+                    </li>
+                    <li>
+                      Space Complexity: O(N + K) - O(N) for the frequency map in
+                      the worst case (all elements unique). O(K) for the heap.
+                    </li>
+                  </ul>
+                  <p class="mt-2 text-sm italic text-gray-400">
+                    Alternative: O(N) average time using QuickSelect
+                    (Partitioning), but often more complex to implement.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div
+          id="random-question-generator"
+          class="pattern-content bg-gray-800 p-8 rounded-lg shadow-md border border-gray-700"
+        >
+          <h2
+            class="text-3xl font-semibold mb-6 border-b border-gray-700 pb-3 text-gray-100"
+          >
+            Random Practice Question
+          </h2>
+          <p class="mb-4 text-gray-300">
+            Click the button below to get a random LeetCode problem suggestion
+            from a curated list.
+          </p>
+
+          <button
+            id="generate-question-btn"
+            class="generate-button font-semibold py-3 px-6 rounded-lg shadow transition duration-150 ease-in-out"
+          >
+            Generate Random Problem
+          </button>
+
+          <div id="random-question-display" class="mt-6">
+            <p class="text-center text-gray-400">
+              Click the button to see a problem!
+            </p>
+          </div>
+        </div>
+      </main>
+
+      <div id="sidebar-backdrop"></div>
+    </div>
+
+    <script>
+      // --- Elements ---
+      const sidebar = document.getElementById("sidebar");
+      const mainContent = document.getElementById("main-content");
+      const sidebarToggleButton = document.getElementById("sidebar-toggle");
+      const sidebarBackdrop = document.getElementById("sidebar-backdrop");
+      const contentSections = document.querySelectorAll(
+        ".pattern-content, #random-question-generator"
+      );
+      const welcomeMessage = document.getElementById("welcome-message");
+      const navButtons = document.querySelectorAll(".nav-button");
+      const generateQuestionBtn = document.getElementById(
+        "generate-question-btn"
+      );
+      const questionDisplay = document.getElementById(
+        "random-question-display"
+      );
+
+      // --- LeetCode Problem Bank (Same as before) ---
+      const leetcodeProblems = [
+        // Arrays & Hashing / Sliding Window / Two Pointers
+        {
+          name: "Two Sum",
+          pattern: "Hashing / Two Pointers",
+          link: "https://leetcode.com/problems/two-sum/",
+        },
+        {
+          name: "Best Time to Buy and Sell Stock",
+          pattern: "Sliding Window / Kadane's",
+          link: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/",
+        },
+        {
+          name: "Contains Duplicate",
+          pattern: "Hashing / Sorting",
+          link: "https://leetcode.com/problems/contains-duplicate/",
+        },
+        {
+          name: "Product of Array Except Self",
+          pattern: "Prefix/Suffix Sum",
+          link: "https://leetcode.com/problems/product-of-array-except-self/",
+        },
+        {
+          name: "Maximum Subarray",
+          pattern: "Sliding Window / DP (Kadane's)",
+          link: "https://leetcode.com/problems/maximum-subarray/",
+        },
+        {
+          name: "Maximum Product Subarray",
+          pattern: "DP",
+          link: "https://leetcode.com/problems/maximum-product-subarray/",
+        },
+        {
+          name: "3Sum",
+          pattern: "Two Pointers",
+          link: "https://leetcode.com/problems/3sum/",
+        },
+        {
+          name: "Container With Most Water",
+          pattern: "Two Pointers",
+          link: "https://leetcode.com/problems/container-with-most-water/",
+        },
+        {
+          name: "Longest Substring Without Repeating Characters",
+          pattern: "Sliding Window",
+          link: "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
+        },
+        {
+          name: "Minimum Window Substring",
+          pattern: "Sliding Window / Hashing",
+          link: "https://leetcode.com/problems/minimum-window-substring/",
+        },
+
+        // Linked List / Fast & Slow Pointers
+        {
+          name: "Reverse Linked List",
+          pattern: "Iteration / Recursion",
+          link: "https://leetcode.com/problems/reverse-linked-list/",
+        },
+        {
+          name: "Linked List Cycle",
+          pattern: "Fast & Slow Pointers",
+          link: "https://leetcode.com/problems/linked-list-cycle/",
+        },
+        {
+          name: "Merge Two Sorted Lists",
+          pattern: "Two Pointers",
+          link: "https://leetcode.com/problems/merge-two-sorted-lists/",
+        },
+        {
+          name: "Remove Nth Node From End of List",
+          pattern: "Two Pointers",
+          link: "https://leetcode.com/problems/remove-nth-node-from-end-of-list/",
+        },
+        {
+          name: "Reorder List",
+          pattern: "Fast & Slow Pointers",
+          link: "https://leetcode.com/problems/reorder-list/",
+        },
+        {
+          name: "Merge K Sorted Lists",
+          pattern: "Heap / Priority Queue",
+          link: "https://leetcode.com/problems/merge-k-sorted-lists/",
+        },
+
+        // Dynamic Programming
+        {
+          name: "Climbing Stairs",
+          pattern: "Dynamic Programming",
+          link: "https://leetcode.com/problems/climbing-stairs/",
+        },
+        {
+          name: "Longest Increasing Subsequence",
+          pattern: "Dynamic Programming",
+          link: "https://leetcode.com/problems/longest-increasing-subsequence/",
+        },
+        {
+          name: "Coin Change",
+          pattern: "Dynamic Programming",
+          link: "https://leetcode.com/problems/coin-change/",
+        },
+        {
+          name: "Word Break",
+          pattern: "Dynamic Programming",
+          link: "https://leetcode.com/problems/word-break/",
+        },
+        {
+          name: "House Robber",
+          pattern: "Dynamic Programming",
+          link: "https://leetcode.com/problems/house-robber/",
+        },
+        {
+          name: "Decode Ways",
+          pattern: "Dynamic Programming",
+          link: "https://leetcode.com/problems/decode-ways/",
+        },
+        {
+          name: "Unique Paths",
+          pattern: "Dynamic Programming",
+          link: "https://leetcode.com/problems/unique-paths/",
+        },
+        {
+          name: "Longest Common Subsequence",
+          pattern: "Dynamic Programming",
+          link: "https://leetcode.com/problems/longest-common-subsequence/",
+        },
+
+        // Trees / BFS / DFS
+        {
+          name: "Maximum Depth of Binary Tree",
+          pattern: "DFS / BFS",
+          link: "https://leetcode.com/problems/maximum-depth-of-binary-tree/",
+        },
+        {
+          name: "Invert Binary Tree",
+          pattern: "DFS / BFS",
+          link: "https://leetcode.com/problems/invert-binary-tree/",
+        },
+        {
+          name: "Validate Binary Search Tree",
+          pattern: "DFS (Inorder Traversal)",
+          link: "https://leetcode.com/problems/validate-binary-search-tree/",
+        },
+        {
+          name: "Binary Tree Level Order Traversal",
+          pattern: "BFS",
+          link: "https://leetcode.com/problems/binary-tree-level-order-traversal/",
+        },
+        {
+          name: "Subtree of Another Tree",
+          pattern: "DFS",
+          link: "https://leetcode.com/problems/subtree-of-another-tree/",
+        },
+        {
+          name: "Kth Smallest Element in a BST",
+          pattern: "DFS (Inorder Traversal)",
+          link: "https://leetcode.com/problems/kth-smallest-element-in-a-bst/",
+        },
+        {
+          name: "Lowest Common Ancestor of a BST",
+          pattern: "Tree Traversal",
+          link: "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/",
+        },
+
+        // Graph / BFS / DFS
+        {
+          name: "Number of Islands",
+          pattern: "DFS / BFS",
+          link: "https://leetcode.com/problems/number-of-islands/",
+        },
+        {
+          name: "Clone Graph",
+          pattern: "DFS / BFS / Hashing",
+          link: "https://leetcode.com/problems/clone-graph/",
+        },
+        {
+          name: "Course Schedule",
+          pattern: "DFS / BFS (Topological Sort)",
+          link: "https://leetcode.com/problems/course-schedule/",
+        },
+        {
+          name: "Pacific Atlantic Water Flow",
+          pattern: "DFS / BFS",
+          link: "https://leetcode.com/problems/pacific-atlantic-water-flow/",
+        },
+
+        // Intervals
+        {
+          name: "Merge Intervals",
+          pattern: "Merge Intervals / Sorting",
+          link: "https://leetcode.com/problems/merge-intervals/",
+        },
+        {
+          name: "Insert Interval",
+          pattern: "Intervals / Sorting",
+          link: "https://leetcode.com/problems/insert-interval/",
+        },
+        {
+          name: "Non-overlapping Intervals",
+          pattern: "Greedy / Sorting / Intervals",
+          link: "https://leetcode.com/problems/non-overlapping-intervals/",
+        },
+        {
+          name: "Meeting Rooms II",
+          pattern: "Heap / Priority Queue / Sorting",
+          link: "https://leetcode.com/problems/meeting-rooms-ii/",
+        }, // Often uses heap
+
+        // Heap / Priority Queue
+        {
+          name: "Top K Frequent Elements",
+          pattern: "Heap / Priority Queue / Hashing",
+          link: "https://leetcode.com/problems/top-k-frequent-elements/",
+        },
+        {
+          name: "Find Median from Data Stream",
+          pattern: "Heap / Priority Queue (Two Heaps)",
+          link: "https://leetcode.com/problems/find-median-from-data-stream/",
+        },
+        {
+          name: "Kth Largest Element in an Array",
+          pattern: "Heap / QuickSelect",
+          link: "https://leetcode.com/problems/kth-largest-element-in-an-array/",
+        },
+      ];
+
+      // --- Functions ---
+
+      // Function to toggle sidebar minimization
+      function toggleSidebar() {
+        sidebar.classList.toggle("minimized");
+        // Optional: Change icon based on state
+        const icon = sidebarToggleButton.querySelector("i");
+        if (sidebar.classList.contains("minimized")) {
+          icon.classList.remove("fa-chevron-left");
+          icon.classList.add("fa-chevron-right"); // Or fa-bars for mobile
+        } else {
+          icon.classList.remove("fa-chevron-right");
+          icon.classList.add("fa-chevron-left");
+        }
+        // Close sidebar if clicking backdrop on mobile
+        if (
+          window.innerWidth < 768 &&
+          !sidebar.classList.contains("minimized")
+        ) {
+          // No action needed here, backdrop click handles closing
+        }
+      }
+
+      // Function to close sidebar (specifically for mobile)
+      function closeSidebarMobile() {
+        if (
+          window.innerWidth < 768 &&
+          !sidebar.classList.contains("minimized")
+        ) {
+          sidebar.classList.add("minimized");
+          const icon = sidebarToggleButton.querySelector("i");
+          icon.classList.remove("fa-chevron-left");
+          icon.classList.add("fa-chevron-right"); // Or appropriate icon
+        }
+      }
+
+      // Function to show the selected content section
+      function showContent(contentId) {
+        // Hide welcome message
+        if (welcomeMessage) {
+          welcomeMessage.style.display = "none";
+        }
+
+        // Hide all content sections
+        contentSections.forEach((content) => {
+          content.classList.remove("active");
+        });
+
+        // Deactivate all buttons
+        navButtons.forEach((button) => {
+          button.classList.remove("active");
+        });
+
+        // Show the selected content section
+        const selectedContent = document.getElementById(contentId);
+        if (selectedContent) {
+          selectedContent.classList.add("active");
+          // Scroll the main content area to the top
+          if (mainContent) mainContent.scrollTop = 0;
+        }
+
+        // Activate the clicked button
+        navButtons.forEach((button) => {
+          if (button.dataset.target === contentId) {
+            button.classList.add("active");
+          }
+        });
+
+        // Close sidebar automatically on mobile after selection
+        closeSidebarMobile();
+      }
+
+      // Function to toggle collapsible sections
+      function toggleWalkthroughStep(headerElement) {
+        const stepElement = headerElement.closest(".walkthrough-step");
+        if (stepElement) {
+          stepElement.classList.toggle("open");
+        }
+      }
+
+      // Function to generate and display a random question
+      function displayRandomQuestion() {
+        if (leetcodeProblems.length === 0) {
+          questionDisplay.innerHTML =
+            '<p class="text-red-600">No problems available in the bank.</p>';
+          return;
+        }
+        const randomIndex = Math.floor(Math.random() * leetcodeProblems.length);
+        const problem = leetcodeProblems[randomIndex];
+
+        questionDisplay.innerHTML = `
+                <h4 class="text-xl font-semibold mb-2 text-amber-300">${
+                  problem.name
+                }</h4> <p class="text-md text-gray-300 mb-3"><strong>Common Pattern(s):</strong> ${
+          problem.pattern
+        }</p>
+                ${
+                  problem.link
+                    ? `<a href="${problem.link}" target="_blank" rel="noopener noreferrer" class="text-amber-400 hover:text-amber-300 hover:underline font-medium">View on LeetCode <i class="fas fa-external-link-alt text-xs ml-1"></i></a>`
+                    : ""
+                } `;
+        // Close sidebar automatically on mobile after generation
+        closeSidebarMobile();
+      }
+
+      // --- Event Listeners ---
+
+      // Sidebar toggle button click
+      if (sidebarToggleButton) {
+        sidebarToggleButton.addEventListener("click", toggleSidebar);
+      }
+
+      // Sidebar backdrop click (for closing on mobile)
+      if (sidebarBackdrop) {
+        sidebarBackdrop.addEventListener("click", closeSidebarMobile);
+      }
+
+      // Add click listeners to walkthrough headers
+      document
+        .querySelectorAll(".walkthrough-step-header")
+        .forEach((header) => {
+          header.addEventListener("click", () => toggleWalkthroughStep(header));
+        });
+
+      // Add click listener for the random question button
+      if (generateQuestionBtn) {
+        generateQuestionBtn.addEventListener("click", displayRandomQuestion);
+      }
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", () => {
+        // Apply syntax highlighting
+        hljs.highlightAll();
+
+        // Hide all content sections initially, show welcome
+        contentSections.forEach((content) => {
+          content.classList.remove("active");
+        });
+        if (welcomeMessage) {
+          welcomeMessage.style.display = "block";
+        }
+        // Deactivate all nav buttons
+        navButtons.forEach((button) => {
+          button.classList.remove("active");
+        });
+        // Ensure walkthroughs start closed
+        document.querySelectorAll(".walkthrough-step").forEach((step) => {
+          step.classList.remove("open");
+        });
+
+        // Set initial sidebar state (minimized on mobile, expanded on desktop)
+        if (window.innerWidth < 768) {
+          // md breakpoint
+          sidebar.classList.add("minimized");
+          sidebarToggleButton
+            .querySelector("i")
+            .classList.remove("fa-chevron-left");
+          sidebarToggleButton.querySelector("i").classList.add("fa-bars"); // Use bars icon for mobile toggle
+        } else {
+          sidebar.classList.remove("minimized");
+          sidebarToggleButton.querySelector("i").classList.remove("fa-bars");
+          sidebarToggleButton
+            .querySelector("i")
+            .classList.add("fa-chevron-left");
+        }
+      });
+
+      // Optional: Adjust sidebar state on resize
+      window.addEventListener("resize", () => {
+        const icon = sidebarToggleButton.querySelector("i");
+        if (window.innerWidth < 768) {
+          // If resizing to mobile view, ensure sidebar is minimized by default
+          if (!sidebar.classList.contains("minimized")) {
+            // sidebar.classList.add('minimized'); // Or keep its current state? Let's keep state.
+          }
+          icon.classList.remove("fa-chevron-left", "fa-chevron-right");
+          icon.classList.add("fa-bars"); // Always use bars on mobile
+        } else {
+          // If resizing to desktop view
+          icon.classList.remove("fa-bars");
+          if (sidebar.classList.contains("minimized")) {
+            icon.classList.remove("fa-chevron-left");
+            icon.classList.add("fa-chevron-right");
+          } else {
+            icon.classList.remove("fa-chevron-right");
+            icon.classList.add("fa-chevron-left");
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
